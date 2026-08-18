@@ -1,0 +1,283 @@
+# Ground-truth answer key for VulnBank-Test.
+# Use this to compute recall/precision for each scanner in your pipeline:
+#   recall    = (findings your pipeline caught) / (findings listed here for that tool)
+#   precision = (findings your pipeline caught that are real) / (total findings your pipeline reported)
+#
+# Update expected_semgrep_rule / expected_checkov_id as you confirm actual rule IDs fire,
+# since exact IDs depend on installed ruleset versions.
+
+findings:
+  - id: VULN-001
+    tool: gitleaks
+    file: app/config.py
+    category: hardcoded-secret
+    severity: high
+  - id: VULN-002
+    tool: semgrep
+    file: app/main.py
+    category: sql-injection
+    cwe: CWE-89
+    severity: high
+  - id: VULN-003
+    tool: pure-agent
+    file: app/main.py
+    category: idor-business-logic
+    note: "Not detectable by SAST rules — requires reasoning about auth/ownership flow."
+    severity: high
+  - id: VULN-004
+    tool: semgrep
+    file: app/main.py
+    category: sql-injection
+    cwe: CWE-89
+    severity: high
+  - id: VULN-005
+    tool: semgrep
+    file: app/main.py
+    category: command-injection
+    cwe: CWE-78
+    severity: critical
+  - id: VULN-006
+    tool: semgrep
+    file: app/main.py
+    category: weak-hash
+    cwe: CWE-327
+    severity: medium
+  - id: VULN-007
+    tool: pure-agent
+    file: app/main.py
+    category: weak-jwt-chain
+    note: "Chain: hardcoded secret + HS256 -> needs cross-file reasoning."
+    severity: high
+  - id: VULN-008
+    tool: semgrep
+    file: app/main.py
+    category: jwt-verify-disabled
+    cwe: CWE-347
+    severity: critical
+  - id: VULN-009
+    tool: semgrep
+    file: app/main.py
+    category: eval-injection
+    cwe: CWE-95
+    severity: critical
+  - id: VULN-010
+    tool: semgrep
+    file: app/main.py
+    category: debug-mode-enabled
+    cwe: CWE-489
+    severity: medium
+  - id: VULN-011
+    tool: gitleaks
+    file: app/config.py
+    category: aws-access-key
+    severity: critical
+  - id: VULN-012
+    tool: gitleaks
+    file: app/config.py
+    category: db-connection-string
+    severity: high
+  - id: VULN-013
+    tool: gitleaks
+    file: app/config.py
+    category: payment-gateway-key
+    severity: critical
+  - id: VULN-014
+    tool: gitleaks
+    file: app/config.py
+    category: generic-api-key
+    severity: medium
+  - id: VULN-015
+    tool: checkov
+    file: Dockerfile
+    category: unpinned-base-image
+    severity: low
+  - id: VULN-016
+    tool: checkov
+    file: Dockerfile
+    category: missing-user-directive
+    severity: medium
+  - id: VULN-017
+    tool: checkov
+    file: Dockerfile
+    category: missing-healthcheck
+    severity: low
+  - id: VULN-018
+    tool: checkov
+    file: Dockerfile
+    category: add-instead-of-copy
+    severity: low
+  - id: VULN-019
+    tool: gitleaks
+    file: Dockerfile
+    category: secret-in-image-layer
+    severity: high
+  - id: VULN-020
+    tool: checkov
+    file: Dockerfile
+    category: apt-no-cleanup
+    severity: low
+  - id: VULN-021
+    tool: checkov
+    file: docker-compose.yml
+    category: privileged-container
+    severity: high
+  - id: VULN-022
+    tool: gitleaks
+    file: docker-compose.yml
+    category: hardcoded-secret-env
+    severity: high
+  - id: VULN-023
+    tool: checkov
+    file: docker-compose.yml
+    category: no-resource-limits
+    severity: low
+  - id: VULN-024
+    tool: checkov
+    file: docker-compose.yml
+    category: docker-socket-mount
+    severity: critical
+  - id: VULN-025
+    tool: checkov
+    file: docker-compose.yml
+    category: exposed-db-weak-creds
+    severity: high
+  - id: VULN-026
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: host-network-enabled
+    severity: high
+  - id: VULN-027
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: unpinned-image-tag
+    severity: low
+  - id: VULN-028
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: privileged-container
+    severity: critical
+  - id: VULN-029
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: runs-as-root
+    severity: high
+  - id: VULN-030
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: privilege-escalation-allowed
+    severity: high
+  - id: VULN-031
+    tool: gitleaks
+    file: k8s/deployment.yaml
+    category: hardcoded-secret-env
+    severity: high
+  - id: VULN-032
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: no-resource-limits
+    severity: medium
+  - id: VULN-033
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: hostpath-docker-socket
+    severity: critical
+  - id: VULN-034
+    tool: checkov
+    file: k8s/deployment.yaml
+    category: public-loadbalancer-no-netpol
+    severity: medium
+  - id: VULN-035
+    tool: gitleaks
+    file: terraform/main.tf
+    category: hardcoded-cloud-credentials
+    severity: critical
+  - id: VULN-036
+    tool: checkov
+    file: terraform/main.tf
+    category: s3-versioning-disabled
+    severity: medium
+  - id: VULN-037
+    tool: checkov
+    file: terraform/main.tf
+    category: s3-logging-disabled
+    severity: low
+  - id: VULN-038
+    tool: checkov
+    file: terraform/main.tf
+    category: s3-encryption-disabled
+    severity: high
+  - id: VULN-039
+    tool: checkov
+    file: terraform/main.tf
+    category: s3-public-access-block-disabled
+    severity: critical
+  - id: VULN-040
+    tool: checkov
+    file: terraform/main.tf
+    category: sg-ssh-open-world
+    severity: critical
+  - id: VULN-041
+    tool: checkov
+    file: terraform/main.tf
+    category: sg-db-port-open-world
+    severity: critical
+  - id: VULN-042
+    tool: checkov
+    file: terraform/main.tf
+    category: rds-storage-not-encrypted
+    severity: high
+  - id: VULN-043
+    tool: checkov
+    file: terraform/main.tf
+    category: rds-publicly-accessible
+    severity: critical
+  - id: VULN-044
+    tool: gitleaks
+    file: terraform/main.tf
+    category: hardcoded-db-password
+    severity: critical
+  - id: VULN-045
+    tool: checkov
+    file: terraform/main.tf
+    category: rds-deletion-protection-disabled
+    severity: medium
+  - id: VULN-046
+    tool: checkov
+    file: terraform/main.tf
+    category: rds-backup-retention-zero
+    severity: medium
+  - id: VULN-047
+    tool: checkov
+    file: .github/workflows/ci.yml
+    category: pull_request_target-untrusted-checkout
+    severity: critical
+  - id: VULN-048
+    tool: checkov
+    file: .github/workflows/ci.yml
+    category: overly-broad-permissions
+    severity: high
+  - id: VULN-049
+    tool: checkov
+    file: .github/workflows/ci.yml
+    category: unpinned-action
+    severity: low
+  - id: VULN-050
+    tool: gitleaks
+    file: .github/workflows/ci.yml
+    category: hardcoded-token
+    severity: critical
+
+# Vulnerable dependencies (app/requirements.txt) are intentionally NOT itemized here
+# with specific CVE IDs — let Trivy's live CVE DB report actual current CVEs for these
+# pins rather than hardcoding numbers that go stale. Expect multiple CVEs per package
+# (Flask 0.12.2, PyJWT 1.7.1, Jinja2 2.10.1, PyYAML 5.3.1, requests 2.19.1,
+# urllib3 1.24.1, cryptography 2.3).
+
+summary:
+  total_planted_findings: 50
+  by_tool:
+    semgrep: 8
+    gitleaks: 12
+    checkov: 27
+    pure_agent_only: 2
+    trivy: "N/A — scored against live CVE DB, not fixed count"
