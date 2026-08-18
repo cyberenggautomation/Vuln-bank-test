@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-api
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bank-api
+  template:
+    metadata:
+      labels:
+        app: bank-api
+    spec:
+      # VULN-026 (Checkov CKV_K8S_20): hostNetwork enabled
+      hostNetwork: true
+      containers:
+        - name: bank-api
+          image: bank-api:latest  # VULN-027 (Checkov CKV_K8S_43): image tag not pinned to digest
+          securityContext:
+            # VULN-028 (Checkov CKV_K8S_23): privileged container
+            privileged: true
+            # VULN-029 (Checkov CKV_K8S_20): runAsNonRoot not set / runs as root
+            runAsNonRoot: false
+            # VULN-030 (Checkov CKV_K8S_9): allowPrivilegeEscalation not disabled
+            allowPrivilegeEscalation: true
+          ports:
+            - containerPort: 5000
+          env:
+            # VULN-031 (Gitleaks/Checkov: hardcoded secret in manifest env)
+            - name: JWT_SECRET
+              value: "sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000"
+          # VULN-032 (Checkov CKV_K8S_10/11/12/13): no resource requests/limits
+          # (resources block intentionally omitted)
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+      volumes:
+        # VULN-033 (Checkov CKV_K8S_25): host path volume mount of Docker socket
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bank-api-svc
+spec:
+  type: LoadBalancer  # VULN-034 (Checkov CKV_K8S_...): public LB with no network policy present
+  selector:
+    app: bank-api
+  ports:
+    - port: 80
+      targetPort: 5000
