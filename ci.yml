@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  # VULN-047 (Checkov: pull_request_target with checkout of untrusted head — code exec risk)
+  pull_request_target:
+  push:
+    branches: [main]
+
+permissions: write-all  # VULN-048 (Checkov: overly broad workflow permissions)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2  # VULN-049 (Checkov: unpinned action, not pinned to SHA)
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Build and deploy
+        env:
+          # VULN-050 (Gitleaks: secret referenced directly, not via secrets context, in a
+          # workflow-level env inspectable in logs if echoed)
+          DEPLOY_TOKEN: "ghp_1234567890ABCDEFabcdefGHIJKLMNOPQRSTUV"
+        run: |
+          echo "Deploying with token $DEPLOY_TOKEN"
+          curl -X POST https://deploy.internal/api -H "Authorization: Bearer $DEPLOY_TOKEN"
