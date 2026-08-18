@@ -1,0 +1,10 @@
+# Intentionally outdated/vulnerable pins for Trivy SCA testing.
+# Each has known published CVEs at time of writing — verify current CVE status
+# with Trivy's DB rather than trusting this comment, since advisories get added over time.
+Flask==0.12.2
+PyJWT==1.7.1
+Jinja2==2.10.1
+PyYAML==5.3.1
+requests==2.19.1
+urllib3==1.24.1
+cryptography==2.3
