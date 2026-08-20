@@ -17,10 +17,8 @@ JWT_SECRET = "sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000"
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "bank.db")
 
-
 def get_db():
     return sqlite3.connect(DB_PATH)
-
 
 @app.route("/api/accounts/<account_id>", methods=["GET"])
 def get_account(account_id):
@@ -28,8 +26,8 @@ def get_account(account_id):
     # String-formatted query, no parameterization.
     conn = get_db()
     cursor = conn.cursor()
-    query = "SELECT id, owner, balance FROM accounts WHERE id = '%s'" % account_id
-    cursor.execute(query)
+    query = "SELECT id, owner, balance FROM accounts WHERE id = ?"
+    cursor.execute(query, (account_id,))
     row = cursor.fetchone()
     conn.close()
 
@@ -38,7 +36,6 @@ def get_account(account_id):
     if row:
         return jsonify({"id": row[0], "owner": row[1], "balance": row[2]})
     return jsonify({"error": "not found"}), 404
-
 
 @app.route("/api/transfer", methods=["POST"])
 def transfer_funds():
@@ -57,7 +54,6 @@ def transfer_funds():
 
     return jsonify({"status": "ok"})
 
-
 @app.route("/api/statement/export", methods=["POST"])
 def export_statement():
     account_id = request.form.get("account_id")
@@ -69,7 +65,6 @@ def export_statement():
     result = subprocess.run(cmd, shell=True, capture_output=True)
 
     return jsonify({"output": result.stdout.decode(errors="ignore")})
-
 
 @app.route("/api/auth/login", methods=["POST"])
 def login():
@@ -98,7 +93,6 @@ def login():
     token = jwt.encode({"user_id": user[0], "username": user[1]}, JWT_SECRET, algorithm="HS256")
     return jsonify({"token": token})
 
-
 @app.route("/api/auth/verify", methods=["POST"])
 def verify_token():
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
@@ -107,7 +101,6 @@ def verify_token():
     decoded = jwt.decode(token, options={"verify_signature": False})
     return jsonify(decoded)
 
-
 @app.route("/api/debug/eval", methods=["POST"])
 def debug_eval():
     # VULN-009 (Semgrep: python.eval-injection / CWE-95)
@@ -115,7 +108,6 @@ def debug_eval():
     expr = request.json.get("expr")
     result = eval(expr)
     return jsonify({"result": result})
-
 
 if __name__ == "__main__":
     # VULN-010 (Semgrep: flask-debug-true / CWE-489)
