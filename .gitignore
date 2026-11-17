@@ -1,0 +1,2 @@
+# Secrets must not be committed (added by security remediation)
+/.env

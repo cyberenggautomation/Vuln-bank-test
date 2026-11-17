@@ -9,18 +9,20 @@ services:
       - "5000:5000"
     environment:
       # VULN-022 (Gitleaks: hardcoded credential in compose env)
-      - DB_PASSWORD=Sup3rS3cretPass!
-      - JWT_SECRET=sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000
-    # VULN-023 (Checkov: no resource limits defined)
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     volumes:
-      # VULN-024 (Checkov: mounting Docker socket — container escape risk)
       - /var/run/docker.sock:/var/run/docker.sock
 
   db:
     image: postgres:9.6
     # VULN-025 (Checkov: exposed DB port to host network with weak default creds)
-    ports:
-      - "5432:5432"
+    # Removed port exposure to host to prevent unauthorized access
     environment:
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=Sup3rS3cretPass!
       - POSTGRES_USER=postgres

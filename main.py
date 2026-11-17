@@ -13,7 +13,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # VULN-001 (Gitleaks: generic-api-key / jwt-secret pattern)
-JWT_SECRET = "sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000"
+JWT_SECRET = os.environ.get('JWT_SECRET')  # Load secret from environment variable
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "bank.db")
 
@@ -28,8 +28,8 @@ def get_account(account_id):
     # String-formatted query, no parameterization.
     conn = get_db()
     cursor = conn.cursor()
-    query = "SELECT id, owner, balance FROM accounts WHERE id = '%s'" % account_id
-    cursor.execute(query)
+    query = "SELECT id, owner, balance FROM accounts WHERE id = ?"
+    cursor.execute(query, (account_id,))
     row = cursor.fetchone()
     conn.close()
 
@@ -50,8 +50,8 @@ def transfer_funds():
     # VULN-004 (Semgrep: python.sql-injection, second instance — f-string)
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute(f"UPDATE accounts SET balance = balance - {amount} WHERE id = '{from_acct}'")
-    cursor.execute(f"UPDATE accounts SET balance = balance + {amount} WHERE id = '{to_acct}'")
+    cursor.execute("UPDATE accounts SET balance = balance - ? WHERE id = ?", (amount, from_acct))
+    cursor.execute("UPDATE accounts SET balance = balance + ? WHERE id = ?", (amount, to_acct))
     conn.commit()
     conn.close()
 
@@ -65,8 +65,8 @@ def export_statement():
 
     # VULN-005 (Semgrep: python.command-injection / CWE-78)
     # User-controlled input passed straight to shell=True.
-    cmd = f"statement-exporter --account {account_id} --format {fmt}"
-    result = subprocess.run(cmd, shell=True, capture_output=True)
+    cmd = ["statement-exporter", "--account", account_id, "--format", fmt]
+    result = subprocess.run(cmd, shell=False, capture_output=True)
 
     return jsonify({"output": result.stdout.decode(errors="ignore")})
 
@@ -77,15 +77,11 @@ def login():
     username = data.get("username")
     password = data.get("password")
 
-    # VULN-006 (Semgrep: python.weak-hash / CWE-327)
-    # MD5 for password hashing.
-    hashed = hashlib.md5(password.encode()).hexdigest()
-
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, username FROM users WHERE username = ? AND password_hash = ?",
-        (username, hashed),
+        "SELECT id, username, password_hash FROM users WHERE username = ?",
+        (username,)
     )
     user = cursor.fetchone()
     conn.close()
@@ -93,8 +89,10 @@ def login():
     if not user:
         return jsonify({"error": "invalid credentials"}), 401
 
-    # VULN-007 (Semgrep: jwt-none-alg risk — algorithm not pinned server-side elsewhere,
-    # and JWT_SECRET is hardcoded/weak per VULN-001)
+    stored_hash = user[2]
+    if not bcrypt.checkpw(password.encode(), stored_hash.encode()):
+        return jsonify({"error": "invalid credentials"}), 401
+
     token = jwt.encode({"user_id": user[0], "username": user[1]}, JWT_SECRET, algorithm="HS256")
     return jsonify({"token": token})
 

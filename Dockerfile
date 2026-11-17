@@ -1,5 +1,5 @@
 # VULN-015 (Checkov CKV_DOCKER_7): using 'latest' tag, not pinned
-FROM python:latest
+FROM python:3.11.4-slim
 
 # VULN-016 (Checkov CKV_DOCKER_3): no USER instruction — runs as root
 WORKDIR /app
@@ -13,7 +13,7 @@ ADD app/ /app/
 RUN pip install -r requirements.txt
 
 # VULN-019 (Gitleaks/Checkov CKV_DOCKER_ENV_SECRET-style): secret baked into image layer
-ENV API_SECRET_KEY="build-time-secret-do-not-commit-12345"
+# Removed secret from Dockerfile; inject API_SECRET_KEY at runtime instead
 
 EXPOSE 5000
 

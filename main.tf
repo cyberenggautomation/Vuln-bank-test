@@ -9,19 +9,31 @@ provider "aws" {
 resource "aws_s3_bucket" "statements" {
   bucket = "vulnbank-customer-statements"
 
-  # VULN-036 (Checkov CKV_AWS_21): versioning not enabled
-  # VULN-037 (Checkov CKV_AWS_18): access logging not enabled
-  # VULN-038 (Checkov CKV_AWS_19): server-side encryption not configured
+  versioning {
+    enabled = true
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+  logging {
+    target_bucket = "some-logging-bucket"
+    target_prefix = "vulnbank-customer-statements-logs/"
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "statements" {
   bucket = aws_s3_bucket.statements.id
 
-  # VULN-039 (Checkov CKV_AWS_53/54/55/56): public access block explicitly disabled
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_security_group" "bank_api" {
@@ -52,18 +64,18 @@ resource "aws_db_instance" "core_banking" {
   allocated_storage = 20
 
   # VULN-042 (Checkov CKV_AWS_16): storage not encrypted
-  storage_encrypted = false
+  storage_encrypted = true
 
   # VULN-043 (Checkov CKV_AWS_17): publicly accessible RDS instance
-  publicly_accessible = true
+  publicly_accessible = false
 
   # VULN-044 (Gitleaks: hardcoded DB master password)
   username = "bankadmin"
-  password = "Sup3rS3cretPass!"
+  password = var.db_master_password
 
   # VULN-045 (Checkov CKV_AWS_293): deletion protection disabled
-  deletion_protection = false
+  deletion_protection = true
 
   # VULN-046 (Checkov CKV_AWS_133): backup retention set to 0
-  backup_retention_period = 0
+  backup_retention_period = 7
 }
