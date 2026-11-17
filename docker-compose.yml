@@ -9,8 +9,8 @@ services:
       - "5000:5000"
     environment:
       # VULN-022 (Gitleaks: hardcoded credential in compose env)
-      - DB_PASSWORD=Sup3rS3cretPass!
-      - JWT_SECRET=sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     # VULN-023 (Checkov: no resource limits defined)
     volumes:
       # VULN-024 (Checkov: mounting Docker socket — container escape risk)

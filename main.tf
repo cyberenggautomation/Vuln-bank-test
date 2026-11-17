@@ -9,19 +9,31 @@ provider "aws" {
 resource "aws_s3_bucket" "statements" {
   bucket = "vulnbank-customer-statements"
 
-  # VULN-036 (Checkov CKV_AWS_21): versioning not enabled
-  # VULN-037 (Checkov CKV_AWS_18): access logging not enabled
-  # VULN-038 (Checkov CKV_AWS_19): server-side encryption not configured
+  versioning {
+    enabled = true
+  }
+
+  logging {
+    target_bucket = "some-logging-bucket"
+    target_prefix = "vulnbank-customer-statements/"
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "statements" {
   bucket = aws_s3_bucket.statements.id
 
-  # VULN-039 (Checkov CKV_AWS_53/54/55/56): public access block explicitly disabled
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_security_group" "bank_api" {
