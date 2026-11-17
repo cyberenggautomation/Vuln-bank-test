@@ -1,0 +1,15 @@
+{
+  "name": "vulnbank-portal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Customer portal for VulnBank (intentionally outdated dependencies for security testing)",
+  "dependencies": {
+    "express": "4.17.1",
+    "axios": "0.21.1",
+    "lodash": "4.17.15",
+    "jsonwebtoken": "8.5.1"
+  },
+  "devDependencies": {
+    "minimist": "1.2.0"
+  }
+}
