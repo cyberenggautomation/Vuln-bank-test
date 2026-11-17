@@ -50,8 +50,8 @@ def transfer_funds():
     # VULN-004 (Semgrep: python.sql-injection, second instance — f-string)
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute(f"UPDATE accounts SET balance = balance - {amount} WHERE id = '{from_acct}'")
-    cursor.execute(f"UPDATE accounts SET balance = balance + {amount} WHERE id = '{to_acct}'")
+    cursor.execute("UPDATE accounts SET balance = balance - ? WHERE id = ?", (amount, from_acct))
+    cursor.execute("UPDATE accounts SET balance = balance + ? WHERE id = ?", (amount, to_acct))
     conn.commit()
     conn.close()
 
