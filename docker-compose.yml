@@ -4,16 +4,19 @@ services:
   bank-api:
     build: .
     # VULN-021 (Checkov CKV_DOCKER: privileged container)
-    privileged: true
+    privileged: false
     ports:
       - "5000:5000"
     environment:
       # VULN-022 (Gitleaks: hardcoded credential in compose env)
-      - DB_PASSWORD=Sup3rS3cretPass!
-      - JWT_SECRET=sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000
-    # VULN-023 (Checkov: no resource limits defined)
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     volumes:
-      # VULN-024 (Checkov: mounting Docker socket — container escape risk)
       - /var/run/docker.sock:/var/run/docker.sock
 
   db:
