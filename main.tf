@@ -9,9 +9,22 @@ provider "aws" {
 resource "aws_s3_bucket" "statements" {
   bucket = "vulnbank-customer-statements"
 
-  # VULN-036 (Checkov CKV_AWS_21): versioning not enabled
-  # VULN-037 (Checkov CKV_AWS_18): access logging not enabled
-  # VULN-038 (Checkov CKV_AWS_19): server-side encryption not configured
+  versioning {
+    enabled = true
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+  logging {
+    target_bucket = "vulnbank-logs"
+    target_prefix = "statements-logs/"
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "statements" {
@@ -64,6 +77,5 @@ resource "aws_db_instance" "core_banking" {
   # VULN-045 (Checkov CKV_AWS_293): deletion protection disabled
   deletion_protection = false
 
-  # VULN-046 (Checkov CKV_AWS_133): backup retention set to 0
-  backup_retention_period = 0
+  backup_retention_period = 7
 }

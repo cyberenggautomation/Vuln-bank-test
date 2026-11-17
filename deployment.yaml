@@ -14,33 +14,42 @@ spec:
         app: bank-api
     spec:
       # VULN-026 (Checkov CKV_K8S_20): hostNetwork enabled
-      hostNetwork: true
+      # VULN-026 (Checkov CKV_K8S_20): hostNetwork enabled
+      # Removed hostNetwork: true to reduce attack surface
       containers:
         - name: bank-api
           image: bank-api:latest  # VULN-027 (Checkov CKV_K8S_43): image tag not pinned to digest
           securityContext:
             # VULN-028 (Checkov CKV_K8S_23): privileged container
-            privileged: true
+            privileged: false
             # VULN-029 (Checkov CKV_K8S_20): runAsNonRoot not set / runs as root
-            runAsNonRoot: false
+            runAsNonRoot: true
             # VULN-030 (Checkov CKV_K8S_9): allowPrivilegeEscalation not disabled
-            allowPrivilegeEscalation: true
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5000
           env:
             # VULN-031 (Gitleaks/Checkov: hardcoded secret in manifest env)
             - name: JWT_SECRET
-              value: "sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000"
-          # VULN-032 (Checkov CKV_K8S_10/11/12/13): no resource requests/limits
-          # (resources block intentionally omitted)
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt_secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           volumeMounts:
-            - name: docker-sock
-              mountPath: /var/run/docker.sock
-      volumes:
-        # VULN-033 (Checkov CKV_K8S_25): host path volume mount of Docker socket
-        - name: docker-sock
-          hostPath:
-            path: /var/run/docker.sock
+      # Removed docker-sock volumeMount and hostPath volume to eliminate Docker socket access
+      # - name: docker-sock
+      #   mountPath: /var/run/docker.sock
+    # volumes:
+    #   - name: docker-sock
+    #     hostPath:
+    #       path: /var/run/docker.sock
 ---
 apiVersion: v1
 kind: Service
