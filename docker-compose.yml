@@ -4,13 +4,13 @@ services:
   bank-api:
     build: .
     # VULN-021 (Checkov CKV_DOCKER: privileged container)
-    privileged: true
+    privileged: false
     ports:
       - "5000:5000"
     environment:
       # VULN-022 (Gitleaks: hardcoded credential in compose env)
-      - DB_PASSWORD=Sup3rS3cretPass!
-      - JWT_SECRET=sk_live_51NxT3stB4nk1ngS3cr3tKeyDoNotUse0000
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     # VULN-023 (Checkov: no resource limits defined)
     volumes:
       # VULN-024 (Checkov: mounting Docker socket — container escape risk)
@@ -19,8 +19,8 @@ services:
   db:
     image: postgres:9.6
     # VULN-025 (Checkov: exposed DB port to host network with weak default creds)
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=stronguser
+      - POSTGRES_PASSWORD=Str0ngP@ssw0rd!
