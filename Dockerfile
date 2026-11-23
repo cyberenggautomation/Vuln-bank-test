@@ -1,5 +1,5 @@
 # VULN-015 (Checkov CKV_DOCKER_7): using 'latest' tag, not pinned
-FROM python:latest
+FROM python:3.11.4-slim
 
 # VULN-016 (Checkov CKV_DOCKER_3): no USER instruction — runs as root
 WORKDIR /app
